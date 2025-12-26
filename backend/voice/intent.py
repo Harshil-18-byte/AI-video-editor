@@ -13,3 +13,10 @@ def parse_intent(text: str):
         return "UNDO"
 
     return "UNKNOWN"
+
+def confidence_score(intent, signals):
+    if intent == "REMOVE_SILENCE":
+        return min(0.95, signals.get("silence_ratio", 0.5) + 0.3)
+    if intent == "CUT":
+        return 0.8
+    return 0.6
