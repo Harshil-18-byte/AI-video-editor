@@ -1,25 +1,19 @@
-export default function Indicators({
-  listening,
-  gestures
-}: {
-  listening: boolean;
-  gestures: boolean;
-}) {
+export default function Indicators({ listening, gesture }: any) {
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: 12,
-        right: 12,
-        display: "flex",
-        gap: 8
-      }}
-    >
-      {listening && (
-        <span style={{ color: "#22C55E" }}>🎙 Listening</span>
-      )}
-      {gestures && (
-        <span style={{ color: "#3B82F6" }}>✋ Gestures ON</span>
+    <div style={{ position: "fixed", bottom: 14, right: 14 }}>
+      {listening && <span>🎙 Listening</span>}
+      {gesture && (
+        <div
+          style={{
+            marginTop: 6,
+            padding: "6px 10px",
+            background: "#1E293B",
+            borderRadius: 8,
+            animation: "pulse 0.5s ease"
+          }}
+        >
+          ✋ Gesture detected
+        </div>
       )}
     </div>
   );
