@@ -10,3 +10,12 @@ export default function Panel({ text, intent, confidence, reason }: any) {
     </div>
   );
 }
+export default function Panel({ text, intent }: any) {
+  return (
+    <div style={{ background: "#161A22", padding: 12 }}>
+      <p>{text}</p>
+      <strong>{intent}</strong>
+      <button>Apply</button>
+    </div>
+  );
+}
