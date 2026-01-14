@@ -1,7 +1,7 @@
 # AIVA Editor
 
-**AIVA Editor** is a professional-grade, local, file-based video editor with integrated AI assistance.
-Designed for stability, trust, and professional workflows.
+AIVA is a system-wide AI assistant for video editing that works on top of
+any software — similar to Grammarly for writing.
 
 ## Features
 
