@@ -1,8 +1,11 @@
 openai-whisper
 torch
 numpy
+sounddevice
 soundfile
+pvporcupine
 fastapi
 uvicorn
 opencv-python
-python-multipart
+mss
+pytesseract

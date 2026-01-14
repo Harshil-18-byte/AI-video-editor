@@ -3,6 +3,7 @@ import { X, Monitor, Cpu, Folder, Radio, Keyboard, Sliders, Volume2, Film, Layer
 
 interface SettingsModalProps {
   onClose: () => void;
+  showToast?: (message: string, type: 'success' | 'error') => void;
 }
 
 // Default Professional Metadata
@@ -21,6 +22,9 @@ const DEFAULT_SETTINGS = {
   aiStrength: 50,
   detectSilenceThreshold: -40,
   autoGenerateProxies: false,
+  aiVoiceIsolation: false,
+  aiSceneDetect: true,
+  aiGenerativeFill: false,
   
   // Timeline
   defaultDurationStill: 5,
@@ -34,7 +38,7 @@ const DEFAULT_SETTINGS = {
   maxCacheSize: 50, // GB
 };
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, showToast }) => {
   const [activeTab, setActiveTab] = useState('general');
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
@@ -53,7 +57,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const handleSave = () => {
     localStorage.setItem('antigravity_settings', JSON.stringify(settings));
     // In a real app, this would also trigger a context update or IPC call
-    alert("Configuration Saved Successfully");
+    showToast?.("Configuration Saved Successfully", 'success');
     onClose();
   };
 
@@ -362,6 +366,49 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                        </div>
                      </div>
                  </section>
+
+                 <section className="space-y-4">
+                    <h3 className="text-sm font-bold text-[#3b82f6] uppercase tracking-wide border-b border-[#2c2c30] pb-2">Generative & Enhancement</h3>
+                     
+                     <div className="flex items-center justify-between py-3">
+                      <div>
+                        <span className="text-sm text-[#e4e4e7] block">AI Voice Isolation</span>
+                        <span className="text-xs text-[#a1a1aa]">Remove background noise from spoken audio</span>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={(settings as any).aiVoiceIsolation}
+                        onChange={(e) => updateSetting('aiVoiceIsolation' as any, e.target.checked)}
+                        className="accent-[#3b82f6]" 
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between py-3">
+                      <div>
+                        <span className="text-sm text-[#e4e4e7] block">Smart Scene Detection</span>
+                        <span className="text-xs text-[#a1a1aa]">Automatically cut clips at scene changes</span>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={(settings as any).aiSceneDetect}
+                        onChange={(e) => updateSetting('aiSceneDetect' as any, e.target.checked)}
+                        className="accent-[#3b82f6]" 
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between py-3">
+                      <div>
+                        <span className="text-sm text-[#e4e4e7] block">Generative Fill (Beta)</span>
+                        <span className="text-xs text-[#a1a1aa]">Expand images to fill aspect ratio</span>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={(settings as any).aiGenerativeFill}
+                        onChange={(e) => updateSetting('aiGenerativeFill' as any, e.target.checked)}
+                        className="accent-[#3b82f6]" 
+                      />
+                    </div>
+                 </section>
                </div>
             )}
             
@@ -381,9 +428,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                           <button 
                             onClick={async () => {
                               try {
-                                const res = await fetch('http://127.0.0.1:8000/system/browse');
+                                const res = await fetch('http://127.0.0.1:8000/system/browse_folder');
                                 const data = await res.json();
-                                if (data.path) {
+                                if (data.status === 'success' && data.path) {
                                   updateSetting('cacheLocation', data.path);
                                 }
                               } catch (e) {
@@ -414,7 +461,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                    </div>
 
                    <div className="pt-2">
-                     <button className="text-xs text-red-400 hover:text-white border border-red-900/50 bg-red-950/30 px-4 py-2 rounded transition-colors flex items-center gap-2">
+                     <button 
+                       onClick={async () => {
+                         try {
+                           const res = await fetch('http://127.0.0.1:8000/system/clean_cache', {
+                             method: 'POST',
+                             headers: { 'Content-Type': 'application/json' },
+                             body: JSON.stringify({ cache_path: settings.cacheLocation })
+                           });
+                           const data = await res.json();
+                           if (data.status === 'success') {
+                             showToast?.(data.message, 'success');
+                           } else {
+                             showToast?.(data.message, 'error');
+                           }
+                         } catch (e) {
+                           showToast?.("Failed to clean cache", 'error');
+                         }
+                       }}
+                       className="text-xs text-red-400 hover:text-white border border-red-900/50 bg-red-950/30 px-4 py-2 rounded transition-colors flex items-center gap-2"
+                     >
                        <Folder size={14} />
                        Clean Unused Cache Files
                      </button>

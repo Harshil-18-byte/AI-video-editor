@@ -1,8 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
   /* Professional Dark Theme Palette */
@@ -10,17 +10,17 @@
   --bg-panel: #18181b;
   --bg-panel-hover: #222226;
   --bg-input: #0a0a0c;
-  
+
   --border-light: #2c2c30;
   --border-focus: #4b4b55;
-  
+
   --text-primary: #e4e4e7;
   --text-secondary: #a1a1aa;
   --text-disabled: #52525b;
-  
+
   --accent-primary: #3b82f6;
   --accent-hover: #2563eb;
-  
+
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --header-height: 48px;
@@ -31,14 +31,15 @@
   box-sizing: border-box;
 }
 
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   width: 100vw;
   height: 100vh;
   background-color: var(--bg-root);
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   overflow: hidden;
 }
 
@@ -124,4 +125,27 @@ input:focus {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--border-focus);
+}
+
+.track-hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.track-hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
 }
