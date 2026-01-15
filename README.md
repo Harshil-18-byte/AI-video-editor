@@ -1,8 +1,7 @@
 # AIVA Editor
 
 AIVA is a system-wide AI assistant for video editing that works on top of
-any software — similar to Grammarly for writing.
-
+any software, along with some AI features embedded in it's own editor.
 ## Features
 
 - **Professional 3-Pane NLE Layout**: Media Bin, Preview Monitor, and Timeline.
