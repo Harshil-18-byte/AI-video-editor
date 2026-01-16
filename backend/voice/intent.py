@@ -3,14 +3,26 @@ def parse_intent(text: str):
 
     if "remove silence" in t:
         return "REMOVE_SILENCE"
-    if "cut" in t:
+    if "cut" in t or "split" in t:
         return "CUT"
-    if "play" in t:
+    if "delete" in t or "remove clip" in t:
+        return "DELETE_CLIP"
+    if "play" in t or "start" in t:
         return "PLAY"
-    if "pause" in t:
+    if "pause" in t or "stop" in t:
         return "PAUSE"
     if "caption" in t or "subtitle" in t:
         return "CAPTION"
+    if (
+        "cinematic" in t
+        or "bright" in t
+        or "dark" in t
+        or "color" in t
+        or "grade" in t
+        or "saturat" in t
+        or "look" in t
+    ):
+        return "COLOR_GRADE"
     if (
         "add transition" in t
         or "transition" in t
