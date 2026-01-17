@@ -153,8 +153,15 @@ for root, dirs, files in os.walk(ROOT_DIR):
             }
             lang = lang_map.get(ext, "")
 
-            # Create a Markdown cell for this file
-            cell_source = [f"### 📄 `{rel_path}`\n", f"```{lang}\n", content, "\n```"]
+            # Create a collapsible Markdown cell for this file
+            cell_source = [
+                f"<details>\n",
+                f"<summary>📄 <b>{rel_path}</b></summary>\n\n",
+                f"```{lang}\n",
+                content,
+                "\n```\n",
+                "</details>\n",
+            ]
 
             code_cells.append(
                 {"cell_type": "markdown", "metadata": {}, "source": cell_source}
