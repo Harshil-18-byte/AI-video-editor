@@ -352,14 +352,11 @@ def apply(payload: dict):
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
-            # Use 'avc1' or 'H264' if available. Fallback to 'mp4v' if needed, but 'avc1' is better for browsers.
-            try:
-                fourcc = cv2.VideoWriter_fourcc(*"avc1")
-            except:
-                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-
+            # Use 'vp80' (WebM) for reliable browser playback
+            fourcc = cv2.VideoWriter_fourcc(*"vp80")
             name, ext = os.path.splitext(input_path)
-            output_path = f"{name}_stable_{int(time.time())}{ext}"
+            # Force .webm extension
+            output_path = f"{name}_stable_{int(time.time())}.webm"
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
             # Pass-through with 5% crop to simulate "stabilization zoom"
@@ -390,12 +387,9 @@ def apply(payload: dict):
             center_x = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 2)
 
             fps = cap.get(cv2.CAP_PROP_FPS)
-            try:
-                fourcc = cv2.VideoWriter_fourcc(*"avc1")
-            except:
-                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            fourcc = cv2.VideoWriter_fourcc(*"vp80")
             name, ext = os.path.splitext(input_path)
-            output_path = f"{name}_9x16_{int(time.time())}{ext}"
+            output_path = f"{name}_9x16_{int(time.time())}.webm"
             # Output is strictly vertical
             out = cv2.VideoWriter(output_path, fourcc, fps, (target_w, h))
 
@@ -441,12 +435,9 @@ def apply(payload: dict):
                 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                 fps = cap.get(cv2.CAP_PROP_FPS)
-                try:
-                    fourcc = cv2.VideoWriter_fourcc(*"avc1")
-                except:
-                    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+                fourcc = cv2.VideoWriter_fourcc(*"vp80")
                 name, ext = os.path.splitext(input_path)
-                output_path = f"{name}_bright_{int(time.time())}{ext}"
+                output_path = f"{name}_bright_{int(time.time())}.webm"
                 out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
                 while True:
@@ -468,12 +459,9 @@ def apply(payload: dict):
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
-            try:
-                fourcc = cv2.VideoWriter_fourcc(*"avc1")
-            except:
-                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            fourcc = cv2.VideoWriter_fourcc(*"vp80")
             name, ext = os.path.splitext(input_path)
-            output_path = f"{name}_enhanced_{int(time.time())}{ext}"
+            output_path = f"{name}_enhanced_{int(time.time())}.webm"
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
             while True:
@@ -501,12 +489,9 @@ def apply(payload: dict):
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
-            try:
-                fourcc = cv2.VideoWriter_fourcc(*"avc1")
-            except:
-                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            fourcc = cv2.VideoWriter_fourcc(*"vp80")
             name, ext = os.path.splitext(input_path)
-            output_path = f"{name}_cine_{int(time.time())}{ext}"
+            output_path = f"{name}_cine_{int(time.time())}.webm"
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
             while True:
@@ -543,12 +528,9 @@ def apply(payload: dict):
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
-            try:
-                fourcc = cv2.VideoWriter_fourcc(*"avc1")
-            except:
-                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            fourcc = cv2.VideoWriter_fourcc(*"vp80")
             name, ext = os.path.splitext(input_path)
-            output_path = f"{name}_2x_{int(time.time())}{ext}"
+            output_path = f"{name}_2x_{int(time.time())}.webm"
 
             # Target 2x
             target_w = width * 2
