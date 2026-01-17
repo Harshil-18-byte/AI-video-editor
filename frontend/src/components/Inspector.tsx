@@ -325,17 +325,26 @@ export const Inspector: React.FC<InspectorProps> = ({ selectedClip, onUpdateClip
                              <input 
                                type="range" min="0" max="200" 
                                className="w-full h-1 bg-zinc-900 rounded appearance-none cursor-pointer accent-green-600"
-                               value={selectedClip.volume || 100}
-                               onChange={(e) => onUpdateClip(selectedClip.id, { volume: parseInt(e.target.value) })}
+                               value={selectedClip.volume ?? 100}
+                               onChange={(e) => {
+                                 const val = parseInt(e.target.value);
+                                 onUpdateClip(selectedClip.id, { volume: val });
+                                 // Optional: Add debounce for heavy backend updates if needed, 
+                                 // but for local UI preview only state update is fine.
+                               }}
                              />
                           </div>
                           <div className="pt-4 border-t border-[#1f1f23] space-y-4">
                              <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600">Normalization</p>
                              <button 
-                               onClick={() => runAI('audio_normalize')}
-                               className="w-full py-2 bg-zinc-900 border border-[#1f1f23] rounded text-[9px] font-bold uppercase tracking-widest hover:border-green-500/50 transition-all"
+                               onClick={() => {
+                                   showToast?.("Analyzing audio levels...", "success");
+                                   runAI('audio_normalize');
+                               }}
+                               disabled={isProcessing !== null}
+                               className={`w-full py-2 bg-zinc-900 border border-[#1f1f23] rounded text-[9px] font-bold uppercase tracking-widest hover:border-green-500/50 transition-all ${isProcessing === 'audio_normalize' ? 'opacity-50 cursor-wait' : ''}`}
                              >
-                               AI Loudness Leveling
+                               {isProcessing === 'audio_normalize' ? 'Processing...' : 'AI Loudness Leveling'}
                              </button>
                           </div>
                           
@@ -343,7 +352,15 @@ export const Inspector: React.FC<InspectorProps> = ({ selectedClip, onUpdateClip
                              <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600">Voice Changer Effects</p>
                              <div className="grid grid-cols-2 gap-2">
                                 {['chipmunk', 'monster', 'robot', 'echo', 'alien'].map(fx => (
-                                    <button key={fx} onClick={() => applyVoiceEffect(fx)} className="px-3 py-2 bg-zinc-900 border border-[#1f1f23] rounded hover:border-blue-500/50 hover:bg-zinc-800 transition-all text-[9px] font-black uppercase text-zinc-400 hover:text-white">
+                                    <button 
+                                        key={fx} 
+                                        onClick={() => {
+                                            showToast?.(`Applying ${fx} effect...`, "success");
+                                            applyVoiceEffect(fx); 
+                                        }}
+                                        disabled={isProcessing !== null}
+                                        className={`px-3 py-2 bg-zinc-900 border border-[#1f1f23] rounded hover:border-blue-500/50 hover:bg-zinc-800 transition-all text-[9px] font-black uppercase text-zinc-400 hover:text-white ${isProcessing === 'voice_fx' ? 'opacity-50 cursor-wait' : ''}`}
+                                    >
                                         {fx}
                                     </button>
                                 ))}

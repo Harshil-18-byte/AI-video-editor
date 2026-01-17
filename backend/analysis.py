@@ -54,13 +54,21 @@ def analyze_media(file_path):
             pass
 
     except Exception as e:
+    except Exception as e:
         print(f"Audio analysis failed: {e}")
 
     # 2. Video Analysis
     if is_video:
         try:
+            # OpenCV file check
+            if not os.path.exists(file_path):
+                 return suggestions # Early exit
+            
             cap = cv2.VideoCapture(file_path)
-            if cap.isOpened():
+            if not cap.isOpened():
+                print(f"Error opening video for analysis: {file_path}")
+                # Don't crash, just proceed to default suggestions
+            else:
                 width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
                 height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
                 fps = cap.get(cv2.CAP_PROP_FPS)
