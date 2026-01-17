@@ -554,6 +554,52 @@ def apply(payload: dict):
             cap.release()
             out.release()
 
+        elif action == "generate_captions":
+            # Transcription via apply endpoint
+            text = transcribe_file(input_path)
+            # We can't return text in 'output_file', so we must return it in custom key
+            # But the frontend expects output_file.
+            # Ideally, TopBar should handle this. For now, we return it in message or separate field.
+            return {
+                "status": "success",
+                "message": "Captions Generated",
+                "transcription": text,
+                # No output file change for captions typically
+            }
+
+        elif action == "extend_scene":
+            # Simulate "Generative Extension"
+            # We will just duplicate the last 1 second of video to make it longer
+            import cv2
+
+            cap = cv2.VideoCapture(input_path)
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            fourcc = cv2.VideoWriter_fourcc(*"vp80")
+
+            name, ext = os.path.splitext(input_path)
+            output_path = f"{name}_extended_{int(time.time())}.webm"
+            out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+            frames = []
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                out.write(frame)
+                frames.append(frame)
+
+            # Append last 1 second (approx 30 frames or fps)
+            if frames:
+                last_frame = frames[-1]
+                count = int(fps)  # 1 second
+                for _ in range(count):
+                    out.write(last_frame)
+
+            cap.release()
+            out.release()
+
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -605,7 +651,8 @@ def enhance_audio(payload: dict):
         if max_val > 0:
             y_clean = y_clean / max_val * 0.95
 
-        output_path = input_path.replace(".", "_enhanced.")
+        name, ext = os.path.splitext(input_path)
+        output_path = f"{name}_enhanced_{int(time.time())}{ext}"
         sf.write(output_path, y_clean, sr)
 
         return {
