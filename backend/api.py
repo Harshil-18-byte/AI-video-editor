@@ -151,15 +151,32 @@ def context():
 @app.get("/system/browse_file")
 def browse_file():
     try:
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes("-topmost", True)
-        file_path = filedialog.askopenfilename()
-        root.destroy()
+        import threading
 
-        if file_path:
-            return {"status": "success", "path": file_path.replace("\\", "/")}
-        return {"status": "cancel", "path": None}
+        result = {"status": "cancel", "path": None}
+
+        def run_dialog():
+            try:
+                root = tk.Tk()
+                root.withdraw()
+                root.attributes("-topmost", True)
+                file_path = filedialog.askopenfilename()
+                root.destroy()
+
+                if file_path:
+                    result["status"] = "success"
+                    result["path"] = file_path.replace("\\", "/")
+            except Exception as e:
+                print(f"Error in dialog: {e}")
+                result["status"] = "error"
+                result["message"] = str(e)
+
+        # Run in thread to avoid main loop issues
+        thread = threading.Thread(target=run_dialog)
+        thread.start()
+        thread.join(timeout=30)  # 30 second timeout
+
+        return result
     except Exception as e:
         print(f"Error in browse_file: {e}")
         return {"status": "error", "message": str(e)}
@@ -168,15 +185,31 @@ def browse_file():
 @app.get("/system/browse_folder")
 def browse_folder():
     try:
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes("-topmost", True)
-        folder_path = filedialog.askdirectory()
-        root.destroy()
+        import threading
 
-        if folder_path:
-            return {"status": "success", "path": folder_path.replace("\\", "/")}
-        return {"status": "cancel", "path": None}
+        result = {"status": "cancel", "path": None}
+
+        def run_dialog():
+            try:
+                root = tk.Tk()
+                root.withdraw()
+                root.attributes("-topmost", True)
+                folder_path = filedialog.askdirectory()
+                root.destroy()
+
+                if folder_path:
+                    result["status"] = "success"
+                    result["path"] = folder_path.replace("\\", "/")
+            except Exception as e:
+                print(f"Error in dialog: {e}")
+                result["status"] = "error"
+                result["message"] = str(e)
+
+        thread = threading.Thread(target=run_dialog)
+        thread.start()
+        thread.join(timeout=30)
+
+        return result
     except Exception as e:
         print(f"Error in browse_folder: {e}")
         return {"status": "error", "message": str(e)}
@@ -234,18 +267,34 @@ def save_project(payload: dict):
 @app.get("/system/browse_save_file")
 def browse_save_file():
     try:
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes("-topmost", True)
-        file_path = filedialog.asksaveasfilename(
-            defaultextension=".json",
-            filetypes=[("AIVA Project", "*.json"), ("All Files", "*.*")],
-        )
-        root.destroy()
+        import threading
 
-        if file_path:
-            return {"status": "success", "path": file_path.replace("\\", "/")}
-        return {"status": "cancel", "path": None}
+        result = {"status": "cancel", "path": None}
+
+        def run_dialog():
+            try:
+                root = tk.Tk()
+                root.withdraw()
+                root.attributes("-topmost", True)
+                file_path = filedialog.asksaveasfilename(
+                    defaultextension=".json",
+                    filetypes=[("AIVA Project", "*.json"), ("All Files", "*.*")],
+                )
+                root.destroy()
+
+                if file_path:
+                    result["status"] = "success"
+                    result["path"] = file_path.replace("\\", "/")
+            except Exception as e:
+                print(f"Error in dialog: {e}")
+                result["status"] = "error"
+                result["message"] = str(e)
+
+        thread = threading.Thread(target=run_dialog)
+        thread.start()
+        thread.join(timeout=30)
+
+        return result
     except Exception as e:
         print(f"Error in browse_save_file: {e}")
         return {"status": "error", "message": str(e)}
@@ -352,11 +401,11 @@ def apply(payload: dict):
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
-            # Use 'vp80' (WebM) for reliable browser playback
-            fourcc = cv2.VideoWriter_fourcc(*"vp80")
+            # Use mp4v for better OpenCV compatibility
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
             name, ext = os.path.splitext(input_path)
-            # Force .webm extension
-            output_path = f"{name}_stable_{int(time.time())}.webm"
+            # Use .mp4 extension
+            output_path = f"{name}_stable_{int(time.time())}.mp4"
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
             # Pass-through with 5% crop to simulate "stabilization zoom"
@@ -387,9 +436,9 @@ def apply(payload: dict):
             center_x = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 2)
 
             fps = cap.get(cv2.CAP_PROP_FPS)
-            fourcc = cv2.VideoWriter_fourcc(*"vp80")
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
             name, ext = os.path.splitext(input_path)
-            output_path = f"{name}_9x16_{int(time.time())}.webm"
+            output_path = f"{name}_9x16_{int(time.time())}.mp4"
             # Output is strictly vertical
             out = cv2.VideoWriter(output_path, fourcc, fps, (target_w, h))
 
@@ -435,9 +484,9 @@ def apply(payload: dict):
                 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                 fps = cap.get(cv2.CAP_PROP_FPS)
-                fourcc = cv2.VideoWriter_fourcc(*"vp80")
+                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
                 name, ext = os.path.splitext(input_path)
-                output_path = f"{name}_bright_{int(time.time())}.webm"
+                output_path = f"{name}_bright_{int(time.time())}.mp4"
                 out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
                 while True:
@@ -459,9 +508,9 @@ def apply(payload: dict):
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
-            fourcc = cv2.VideoWriter_fourcc(*"vp80")
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
             name, ext = os.path.splitext(input_path)
-            output_path = f"{name}_enhanced_{int(time.time())}.webm"
+            output_path = f"{name}_enhanced_{int(time.time())}.mp4"
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
             while True:
@@ -489,9 +538,9 @@ def apply(payload: dict):
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
-            fourcc = cv2.VideoWriter_fourcc(*"vp80")
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
             name, ext = os.path.splitext(input_path)
-            output_path = f"{name}_cine_{int(time.time())}.webm"
+            output_path = f"{name}_cine_{int(time.time())}.mp4"
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
             while True:
@@ -528,9 +577,9 @@ def apply(payload: dict):
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
-            fourcc = cv2.VideoWriter_fourcc(*"vp80")
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
             name, ext = os.path.splitext(input_path)
-            output_path = f"{name}_2x_{int(time.time())}.webm"
+            output_path = f"{name}_2x_{int(time.time())}.mp4"
 
             # Target 2x
             target_w = width * 2
@@ -576,11 +625,18 @@ def apply(payload: dict):
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
-            fourcc = cv2.VideoWriter_fourcc(*"vp80")
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
             name, ext = os.path.splitext(input_path)
-            output_path = f"{name}_extended_{int(time.time())}.webm"
+            output_path = f"{name}_extended_{int(time.time())}.mp4"
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+            if not out.isOpened():
+                cap.release()
+                return {
+                    "status": "error",
+                    "message": "Could not open video writer for output. Check codec compatibility.",
+                }
 
             frames = []
             while True:

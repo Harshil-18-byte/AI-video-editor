@@ -20,41 +20,42 @@ def analyze_media(file_path):
     is_video = ext in ["mp4", "mov", "avi", "mkv"]
     is_audio = ext in ["mp3", "wav", "aac", "m4a"]
 
-    # 1. Audio Analysis (for both audio and video files)
-    try:
-        # soundfile is faster than librosa for just metadata/reading
-        # But we want stats. Read first 30 seconds to be fast.
-        data, sr = sf.read(file_path, stop=30 * 48000)
-        if len(data.shape) > 1:
-            data = np.mean(data, axis=1)  # Convert to mono for analysis
+    # 1. Audio Analysis (for audio files only - soundfile can't read video containers)
+    if is_audio:
+        try:
+            # soundfile is faster than librosa for just metadata/reading
+            # But we want stats. Read first 30 seconds to be fast.
+            data, sr = sf.read(file_path, stop=30 * 48000)
+            if len(data.shape) > 1:
+                data = np.mean(data, axis=1)  # Convert to mono for analysis
 
-        rms = np.sqrt(np.mean(data**2))
-        db = 20 * np.log10(rms + 1e-9)
+            rms = np.sqrt(np.mean(data**2))
+            db = 20 * np.log10(rms + 1e-9)
 
-        if db < -40:
-            suggestions.append(
-                {
-                    "id": "low_audio",
-                    "title": "Fix Low Volume",
-                    "description": f"Audio levels constitute silence ({db:.1f}dB)",
-                    "action": "normalize_audio",
-                }
-            )
-        elif db > -5:
-            suggestions.append(
-                {
-                    "id": "clip_audio",
-                    "title": "Fix Clipping",
-                    "description": "Audio is peaking too high",
-                    "action": "reduce_gain",
-                }
-            )
-        else:
-            # Basic spectral centroid checks could go here for "muffled" audio if we used librosa
-            pass
+            if db < -40:
+                suggestions.append(
+                    {
+                        "id": "low_audio",
+                        "title": "Fix Low Volume",
+                        "description": f"Audio levels constitute silence ({db:.1f}dB)",
+                        "action": "normalize_audio",
+                    }
+                )
+            elif db > -5:
+                suggestions.append(
+                    {
+                        "id": "clip_audio",
+                        "title": "Fix Clipping",
+                        "description": "Audio is peaking too high",
+                        "action": "reduce_gain",
+                    }
+                )
+            else:
+                # Basic spectral centroid checks could go here for "muffled" audio if we used librosa
+                pass
 
-    except Exception as e:
-        print(f"Audio analysis failed: {e}")
+        except Exception as e:
+            print(f"Audio analysis failed: {e}")
 
     # 2. Video Analysis
     if is_video:
