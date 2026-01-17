@@ -1,7 +1,7 @@
 import json
 import os
 
-NOTEBOOK_PATH = r"c:\AIVA\project_report.ipynb"
+NOTEBOOK_PATH = r"c:\AIVA\AIVA.ipynb"
 ROOT_DIR = r"c:\AIVA"
 
 # 1. Load existing notebook to preserve original content
