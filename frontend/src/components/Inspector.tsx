@@ -202,23 +202,28 @@ export const Inspector: React.FC<InspectorProps> = ({ selectedClip, onUpdateClip
                       <div className="pt-6 border-t border-[#1f1f23] space-y-4">
                          <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600">Luma / Chrominance</span>
                          <div className="space-y-4">
-                            {(['lift', 'gamma', 'gain'] as const).map(mode => (
-                               <div key={mode} className="space-y-2">
-                                  <div className="flex justify-between text-[8px] font-black uppercase text-zinc-500">
-                                     <span>{mode}</span>
-                                     <span>{(selectedClip[mode]?.g ?? 1).toFixed(2)}</span>
-                                  </div>
-                                  <input 
-                                    type="range" min="0" max="200"
-                                    className="w-full h-1 bg-zinc-900 rounded appearance-none cursor-pointer accent-orange-600"
-                                    value={(selectedClip[mode]?.g ?? 1) * 100}
-                                    onChange={(e) => {
-                                        const val = parseInt(e.target.value) / 100;
-                                        onUpdateClip(selectedClip.id, { [mode]: { r: val, g: val, b: val } });
-                                    }}
-                                  />
-                               </div>
-                            ))}
+                            {['lift', 'gamma', 'gain'].map(m => {
+                      const mode = m as keyof Clip;
+                      return (
+                      <div key={mode} className="space-y-2">
+                           <div className="flex justify-between text-[10px] text-zinc-500 uppercase font-bold">
+                              <span>{mode}</span>
+                              {/* Lift defaults 0, Gamma/Gain default 1 */}
+                              {/* @ts-ignore - dynamic access to lift/gamma/gain */}
+                              <span>{(selectedClip[mode]?.g ?? (mode === 'lift' ? 0 : 1)).toFixed(2)}</span>
+                           </div>
+                           <input 
+                              type="range" min={mode === 'lift' ? "-100" : "0"} max="200" 
+                              className="w-full h-1 bg-zinc-900 rounded appearance-none cursor-pointer accent-purple-600"
+                              /* @ts-ignore */
+                              value={(selectedClip[mode]?.g ?? (mode === 'lift' ? 0 : 1)) * 100}
+                              onChange={(e) => {
+                                 const val = parseInt(e.target.value) / 100;
+                                 onUpdateClip(selectedClip.id, { [mode]: { r: val, g: val, b: val } });
+                              }}
+                           />
+                      </div>
+                  )})}
                          </div>
                       </div>
                    </div>

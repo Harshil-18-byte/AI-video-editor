@@ -67,6 +67,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onSettingsClick, onImportClick, 
     }
 
     try {
+      showToast?.(`Starting ${action.replace('_', ' ')}...`, "success");
       const response = await fetch('http://localhost:8000/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -78,10 +79,16 @@ export const TopBar: React.FC<TopBarProps> = ({ onSettingsClick, onImportClick, 
       });
       const data = await response.json();
       if (data.status === 'success') {
-        if (selectedClip && data.output_file) {
-           onUpdateClip(selectedClip.id, { path: data.output_file, name: `AI_${selectedClip.name}` });
+        if (selectedClip) {
+             if (data.output_file) {
+                 onUpdateClip(selectedClip.id, { path: data.output_file, name: `AI_${selectedClip.name}` });
+             }
+             if (data.transcription) {
+                 onUpdateClip(selectedClip.id, { transcription: data.transcription });
+                 showToast?.("Transcription added to clip metadata", "success");
+             }
         }
-        showToast?.(`${data.message}: ${data.output_file}`, 'success');
+        showToast?.(`${data.message || 'Action Complete'}${data.output_file ? ': ' + data.output_file.split('/').pop() : ''}`, 'success');
       } else {
         showToast?.(`Error: ${data.message}`, 'error');
       }
