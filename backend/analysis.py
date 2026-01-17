@@ -54,7 +54,6 @@ def analyze_media(file_path):
             pass
 
     except Exception as e:
-    except Exception as e:
         print(f"Audio analysis failed: {e}")
 
     # 2. Video Analysis
@@ -62,8 +61,8 @@ def analyze_media(file_path):
         try:
             # OpenCV file check
             if not os.path.exists(file_path):
-                 return suggestions # Early exit
-            
+                return suggestions  # Early exit
+
             cap = cv2.VideoCapture(file_path)
             if not cap.isOpened():
                 print(f"Error opening video for analysis: {file_path}")
