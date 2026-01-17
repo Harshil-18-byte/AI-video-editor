@@ -209,13 +209,13 @@ export const Inspector: React.FC<InspectorProps> = ({ selectedClip, onUpdateClip
                            <div className="flex justify-between text-[10px] text-zinc-500 uppercase font-bold">
                               <span>{mode}</span>
                               {/* Lift defaults 0, Gamma/Gain default 1 */}
-                              {/* @ts-ignore - dynamic access to lift/gamma/gain */}
+                              {/* @ts-expect-error - dynamic access to clip properties like lift/gamma/gain which may complex types */}
                               <span>{(selectedClip[mode]?.g ?? (mode === 'lift' ? 0 : 1)).toFixed(2)}</span>
                            </div>
                            <input 
                               type="range" min={mode === 'lift' ? "-100" : "0"} max="200" 
                               className="w-full h-1 bg-zinc-900 rounded appearance-none cursor-pointer accent-purple-600"
-                              /* @ts-ignore */
+                              /* @ts-expect-error - dynamic access complexity */
                               value={(selectedClip[mode]?.g ?? (mode === 'lift' ? 0 : 1)) * 100}
                               onChange={(e) => {
                                  const val = parseInt(e.target.value) / 100;
