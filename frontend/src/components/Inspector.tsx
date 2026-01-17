@@ -22,6 +22,23 @@ export const Inspector: React.FC<InspectorProps> = ({ selectedClip, onUpdateClip
         showToast?.("Please select a clip on the timeline first.", "error");
         return;
     }
+    
+    // Show immediate feedback
+    const actionNames: Record<string, string> = {
+      'smart_enhance': 'Magic Mask',
+      'upscale_ai': 'Super Scale (2x)',
+      'color_boost': 'Smart Re-light',
+      'enhance_audio': 'Voice Isolation',
+      'remove_silence': 'Silence Removal',
+      'scene_detect': 'Scene Detection',
+      'audio_normalize': 'Audio Normalization',
+      'stabilize_video': 'Video Stabilization',
+      'smart_crop': 'Smart Crop',
+      'cinematic_grade': 'Cinematic Grade'
+    };
+    const friendlyName = actionNames[action] || action.replace('_', ' ');
+    showToast?.(`🚀 Processing: ${friendlyName}...`, 'success');
+    
     setIsProcessing(action);
     try {
       let endpoint = 'http://localhost:8000/apply';
@@ -39,26 +56,31 @@ export const Inspector: React.FC<InspectorProps> = ({ selectedClip, onUpdateClip
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
       const data = await res.json();
       
       if (data.status === 'success' && data.output_file) {
-          // Force UI refresh by adding timestamp query param if path is same, or just rely on backend creating new name
-          // Backend creates new name (e.g. _enhanced), so pure path update is fine.
           onUpdateClip(selectedClip.id, { 
               path: data.output_file,
               name: `AI_${selectedClip.name}`
           });
-          showToast?.(`Success: Applied ${action}`, 'success');
+          showToast?.(`✅ ${friendlyName} Complete!`, 'success');
       } else if (data.status === 'success' && data.scenes && action === 'scene_detect') {
-          // New backend returns 'scenes' array with objects { time: float, frame: int }
-          const times = data.scenes.map((s: { time: number }) => Math.round(s.time * 100)); // Convert seconds to pixels (100px/sec)
+          const times = data.scenes.map((s: { time: number }) => Math.round(s.time * 100));
           onAddMarkers?.(times);
-          showToast?.(`Detected ${times.length} scene changes`, 'success');
+          showToast?.(`✅ Detected ${times.length} scene changes`, 'success');
+      } else if (data.status === 'success') {
+          showToast?.(data.message || `✅ ${friendlyName} completed`, 'success');
       } else {
-          showToast?.(data.message || "Action completed", data.status === 'success' ? 'success' : 'error');
+          showToast?.(`❌ ${friendlyName} failed: ${data.message || 'Unknown error'}`, 'error');
       }
-    } catch {
-      showToast?.("Backend error. Is api.py running?", "error");
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      showToast?.(`❌ ${friendlyName} error: ${errorMsg}. Is the backend running?`, "error");
     } finally {
       setIsProcessing(null);
     }
@@ -202,28 +224,26 @@ export const Inspector: React.FC<InspectorProps> = ({ selectedClip, onUpdateClip
                       <div className="pt-6 border-t border-[#1f1f23] space-y-4">
                          <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600">Luma / Chrominance</span>
                          <div className="space-y-4">
-                            {['lift', 'gamma', 'gain'].map(m => {
-                      const mode = m as keyof Clip;
-                      return (
-                      <div key={mode} className="space-y-2">
-                           <div className="flex justify-between text-[10px] text-zinc-500 uppercase font-bold">
-                              <span>{mode}</span>
-                              {/* Lift defaults 0, Gamma/Gain default 1 */}
-                              {/* @ts-expect-error - dynamic access to clip properties like lift/gamma/gain which may complex types */}
-                              <span>{(selectedClip[mode]?.g ?? (mode === 'lift' ? 0 : 1)).toFixed(2)}</span>
-                           </div>
-                           <input 
-                              type="range" min={mode === 'lift' ? "-100" : "0"} max="200" 
-                              className="w-full h-1 bg-zinc-900 rounded appearance-none cursor-pointer accent-purple-600"
-                              /* @ts-expect-error - dynamic access complexity */
-                              value={(selectedClip[mode]?.g ?? (mode === 'lift' ? 0 : 1)) * 100}
-                              onChange={(e) => {
-                                 const val = parseInt(e.target.value) / 100;
-                                 onUpdateClip(selectedClip.id, { [mode]: { r: val, g: val, b: val } });
-                              }}
-                           />
-                      </div>
-                  )})}
+                             {['lift', 'gamma', 'gain'].map(m => {
+                       const mode = m as 'lift' | 'gamma' | 'gain';
+                       return (
+                       <div key={mode} className="space-y-2">
+                            <div className="flex justify-between text-[10px] text-zinc-500 uppercase font-bold">
+                               <span>{mode}</span>
+                               {/* Lift defaults 0, Gamma/Gain default 1 */}
+                               <span>{(selectedClip[mode]?.g ?? (mode === 'lift' ? 0 : 1)).toFixed(2)}</span>
+                            </div>
+                            <input 
+                               type="range" min={mode === 'lift' ? "-100" : "0"} max="200" 
+                               className="w-full h-1 bg-zinc-900 rounded appearance-none cursor-pointer accent-purple-600"
+                               value={(selectedClip[mode]?.g ?? (mode === 'lift' ? 0 : 1)) * 100}
+                               onChange={(e) => {
+                                  const val = parseInt(e.target.value) / 100;
+                                  onUpdateClip(selectedClip.id, { [mode]: { r: val, g: val, b: val } });
+                               }}
+                            />
+                       </div>
+                   )})}
                          </div>
                       </div>
                    </div>
